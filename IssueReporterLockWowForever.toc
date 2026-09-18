@@ -1,0 +1,8 @@
+## Interface: 16001
+## Title: Issue Reporter Lock
+## Notes: Keeps the Issue Reporter icon and button at their last dragged position across login/reload. Minimap icon click resets saved positions.
+## Author: Nix Solutions
+## Version: 1.0
+## SavedVariables: IssueReporterLockDB, IssueReporterLockDialogDB, IssueReporterLockMinimapDB
+
+IssueReporterLock.lua

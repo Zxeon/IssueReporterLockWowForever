@@ -1,0 +1,4 @@
+package-as: IssueReporterLockWowForever
+ignore:
+  - docs
+  - /*.zip
