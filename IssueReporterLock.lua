@@ -29,12 +29,29 @@ local function MakeMovableAndTrackDrag(frame, getSavedTable, setSavedTable)
 	end
 
 	frame:HookScript("OnDragStart", function(self)
+		self.issueReporterLockDragging = true
 		self:StartMoving()
 	end)
 
 	frame:HookScript("OnDragStop", function(self)
 		self:StopMovingOrSizing()
 		setSavedTable(GetCurrentPositionTable(self))
+		self.issueReporterLockDragging = false
+	end)
+end
+
+-- A full game exit + relaunch runs more UI init steps than /reload does, and
+-- something in that longer sequence can reposition Bug/the Issue Reporter
+-- button again after our one-time apply + OnShow hook already ran (observed:
+-- locking held across /reload but not across a full relaunch). Rather than
+-- chase the exact Blizzard code path doing that, keep re-asserting the saved
+-- position on a cheap timer -- skipped while the user is actively dragging.
+local function StartPositionWatchdog(frame, getSavedTable)
+	C_Timer.NewTicker(2, function()
+		if frame.issueReporterLockDragging then
+			return
+		end
+		ApplySavedPosition(frame, getSavedTable())
 	end)
 end
 
@@ -59,6 +76,9 @@ local function TryBugSetup()
 		return IssueReporterLockDB
 	end, function(pos)
 		IssueReporterLockDB = pos
+	end)
+	StartPositionWatchdog(Bug, function()
+		return IssueReporterLockDB
 	end)
 end
 
@@ -123,6 +143,9 @@ local function TryButtonSetup()
 		return IssueReporterLockDialogDB
 	end, function(pos)
 		IssueReporterLockDialogDB = pos
+	end)
+	StartPositionWatchdog(button, function()
+		return IssueReporterLockDialogDB
 	end)
 end
 
